@@ -5,11 +5,6 @@
   const root = document.documentElement;
   const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-  /* ---------- Theme toggle (session only — no storage APIs) ---------- */
-  const themeToggle = document.querySelector(".theme-toggle");
-  const systemPrefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
-  root.setAttribute("data-theme", systemPrefersDark ? "dark" : "light");
-
   /* ---------- Mobile nav ---------- */
   const navToggle = document.querySelector(".nav-toggle");
   const navLinks = document.querySelector(".nav-links");
