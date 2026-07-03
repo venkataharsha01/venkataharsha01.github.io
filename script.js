@@ -5,20 +5,40 @@
   const root = document.documentElement;
   const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
+
   /* ---------- Mobile nav ---------- */
   const navToggle = document.querySelector(".nav-toggle");
   const navLinks = document.querySelector(".nav-links");
   if (navToggle && navLinks) {
+    const closeNav = () => {
+      navLinks.classList.remove("open");
+      navToggle.setAttribute("aria-expanded", "false");
+      document.body.style.overflow = "";
+    };
+    const openNav = () => {
+      navLinks.classList.add("open");
+      navToggle.setAttribute("aria-expanded", "true");
+      document.body.style.overflow = "hidden";
+    };
     navToggle.addEventListener("click", () => {
-      const isOpen = navLinks.classList.toggle("open");
-      navToggle.setAttribute("aria-expanded", String(isOpen));
+      if (navLinks.classList.contains("open")) closeNav();
+      else openNav();
     });
     navLinks.querySelectorAll("a").forEach((link) =>
-      link.addEventListener("click", () => {
-        navLinks.classList.remove("open");
-        navToggle.setAttribute("aria-expanded", "false");
-      })
+      link.addEventListener("click", closeNav)
     );
+    document.addEventListener("click", (e) => {
+      if (
+        navLinks.classList.contains("open") &&
+        !navLinks.contains(e.target) &&
+        !navToggle.contains(e.target)
+      ) {
+        closeNav();
+      }
+    });
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape" && navLinks.classList.contains("open")) closeNav();
+    });
   }
 
   /* ---------- Scroll reveal ---------- */
