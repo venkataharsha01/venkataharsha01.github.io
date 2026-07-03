@@ -3,6 +3,20 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+<meta http-equiv="Content-Security-Policy"
+content="
+default-src 'self';
+script-src 'self';
+style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
+font-src https://fonts.gstatic.com;
+img-src 'self' data:;
+object-src 'none';
+base-uri 'self';
+frame-ancestors 'none';
+upgrade-insecure-requests;
+">
+  
 <title>Venkata Harsha — Data Analyst Portfolio</title>
 <meta name="description" content="Venkata Harsha — B.Com (Hons) graduate and aspiring data analyst. Excel, Power BI, RapidMiner and Python projects across healthcare, public-sector and rural-development data.">
 
