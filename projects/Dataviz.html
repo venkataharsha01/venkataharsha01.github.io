@@ -1,0 +1,1829 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Pacific at Risk · Climate-Economic Vulnerability · Pacific Dataviz Challenge 2026</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/echarts/5.4.3/echarts.min.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=DM+Serif+Display:ital@0;1&display=swap');
+
+:root {
+  --bg:        #0B1F2E;
+  --surface:   #13344A;
+  --surface2:  #0e2a3d;
+  --accent:    #E8714A;
+  --cyan:      #4FC3D9;
+  --risk-high: #D94B4B;
+  --risk-mid:  #E8A23D;
+  --risk-low:  #3FA67D;
+  --text:      #F4F1EA;
+  --muted:     #8FA3AD;
+  --border:    rgba(79,195,217,0.12);
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Inter', sans-serif;
+  line-height: 1.6;
+  overflow-x: hidden;
+}
+
+/* ── NAVIGATION ── */
+nav {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 100;
+  padding: 16px 48px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: rgba(11,31,46,0.85);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border);
+}
+
+.nav-logo {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--cyan);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.nav-links {
+  display: flex;
+  gap: 32px;
+  list-style: none;
+}
+
+.nav-links a {
+  color: var(--muted);
+  text-decoration: none;
+  font-size: 12px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  transition: color 0.2s;
+}
+
+.nav-links a:hover { color: var(--text); }
+
+/* ── HERO ── */
+.hero {
+  position: relative;
+  height: 100vh;
+  min-height: 600px;
+  display: flex;
+  align-items: flex-end;
+  padding: 0 48px 80px;
+  overflow: hidden;
+}
+
+.hero-bg {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(180deg, rgba(11,31,46,0.3) 0%, rgba(11,31,46,0.7) 60%, rgba(11,31,46,0.97) 100%),
+    linear-gradient(135deg, #0d2a40 0%, #124060 30%, #0a3050 60%, #071e2e 100%);
+}
+
+.hero-waves {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  opacity: 0.4;
+}
+
+.hero-content {
+  position: relative;
+  z-index: 2;
+  max-width: 900px;
+}
+
+.hero-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(79,195,217,0.1);
+  border: 1px solid rgba(79,195,217,0.3);
+  color: var(--cyan);
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 6px 14px;
+  border-radius: 20px;
+  margin-bottom: 24px;
+}
+
+.hero-badge::before {
+  content: '';
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--cyan);
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.5; transform: scale(1.3); }
+}
+
+.hero-title {
+  font-family: 'DM Serif Display', serif;
+  font-size: clamp(52px, 8vw, 96px);
+  line-height: 1.0;
+  color: var(--text);
+  margin-bottom: 8px;
+}
+
+.hero-title span { color: var(--accent); }
+
+.hero-subtitle {
+  font-size: 16px;
+  color: var(--muted);
+  margin-bottom: 40px;
+  max-width: 600px;
+  line-height: 1.7;
+}
+
+.hero-stats {
+  display: flex;
+  gap: 48px;
+}
+
+.hero-stat-value {
+  font-size: 36px;
+  font-weight: 700;
+  color: var(--accent);
+  line-height: 1;
+  margin-bottom: 4px;
+}
+
+.hero-stat-value.cyan { color: var(--cyan); }
+
+.hero-stat-label {
+  font-size: 11px;
+  color: var(--muted);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.hero-scroll {
+  position: absolute;
+  bottom: 32px;
+  right: 48px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  color: var(--muted);
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.hero-scroll-line {
+  width: 1px;
+  height: 48px;
+  background: linear-gradient(to bottom, var(--cyan), transparent);
+  animation: scrollLine 2s ease-in-out infinite;
+}
+
+@keyframes scrollLine {
+  0% { transform: scaleY(0); transform-origin: top; }
+  50% { transform: scaleY(1); transform-origin: top; }
+  51% { transform: scaleY(1); transform-origin: bottom; }
+  100% { transform: scaleY(0); transform-origin: bottom; }
+}
+
+/* ── SECTIONS ── */
+section {
+  padding: 100px 48px;
+  max-width: 1280px;
+  margin: 0 auto;
+}
+
+.section-full {
+  max-width: 100%;
+  padding: 100px 48px;
+}
+
+.section-eyebrow {
+  font-size: 11px;
+  color: var(--cyan);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  margin-bottom: 12px;
+}
+
+.section-title {
+  font-family: 'DM Serif Display', serif;
+  font-size: clamp(32px, 4vw, 52px);
+  line-height: 1.1;
+  margin-bottom: 20px;
+  color: var(--text);
+}
+
+.section-title span { color: var(--accent); }
+.section-title .cyan { color: var(--cyan); }
+
+.section-body {
+  font-size: 16px;
+  color: var(--muted);
+  max-width: 680px;
+  line-height: 1.8;
+  margin-bottom: 48px;
+}
+
+/* ── DIVIDER ── */
+.divider {
+  height: 1px;
+  background: var(--border);
+  margin: 0 48px;
+}
+
+/* ── KPI CARDS ── */
+.kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin-bottom: 48px;
+}
+
+.kpi-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 24px 28px;
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.2s, border-color 0.2s;
+}
+
+.kpi-card:hover {
+  transform: translateY(-2px);
+  border-color: rgba(79,195,217,0.25);
+}
+
+.kpi-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, var(--accent), transparent);
+}
+
+.kpi-card.cyan-top::before {
+  background: linear-gradient(90deg, var(--cyan), transparent);
+}
+
+.kpi-label {
+  font-size: 11px;
+  color: var(--muted);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  margin-bottom: 12px;
+}
+
+.kpi-value {
+  font-size: 42px;
+  font-weight: 700;
+  color: var(--accent);
+  letter-spacing: -0.02em;
+  line-height: 1;
+  margin-bottom: 8px;
+}
+
+.kpi-card.cyan-top .kpi-value { color: var(--cyan); }
+
+.kpi-sub {
+  font-size: 12px;
+  color: var(--muted);
+}
+
+/* ── CHART CARDS ── */
+.chart-grid-2 {
+  display: grid;
+  grid-template-columns: 1.5fr 1fr;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.chart-grid-equal {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.chart-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 24px;
+  transition: border-color 0.2s;
+}
+
+.chart-card:hover { border-color: rgba(79,195,217,0.2); }
+
+.chart-card.full { grid-column: 1 / -1; }
+
+.chart-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 4px;
+}
+
+.chart-subtitle {
+  font-size: 11px;
+  color: var(--muted);
+  margin-bottom: 20px;
+}
+
+.chart-note {
+  font-size: 10px;
+  color: var(--accent);
+  margin-bottom: 16px;
+}
+
+.chart-container {
+  width: 100%;
+  height: 260px;
+}
+
+.chart-container-tall { height: 320px; }
+.chart-container-sm { height: 200px; }
+
+/* ── INSIGHT CALLOUTS ── */
+.insight-strip {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1px;
+  background: var(--border);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  overflow: hidden;
+  margin-bottom: 48px;
+}
+
+.insight-item {
+  background: var(--surface);
+  padding: 28px 32px;
+}
+
+.insight-number {
+  font-size: 11px;
+  color: var(--cyan);
+  letter-spacing: 0.1em;
+  margin-bottom: 12px;
+}
+
+.insight-text {
+  font-size: 15px;
+  color: var(--text);
+  line-height: 1.6;
+}
+
+.insight-text strong { color: var(--accent); }
+.insight-text .cyan { color: var(--cyan); }
+
+/* ── VULN TABLE ── */
+.vuln-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.vuln-table th {
+  text-align: left;
+  padding: 12px 16px;
+  color: var(--cyan);
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  border-bottom: 1px solid var(--border);
+  font-weight: 500;
+}
+
+.vuln-table td {
+  padding: 12px 16px;
+  border-bottom: 1px solid rgba(79,195,217,0.05);
+  color: var(--text);
+}
+
+.vuln-table tr:hover td { background: rgba(79,195,217,0.04); }
+
+.risk-badge {
+  display: inline-block;
+  padding: 2px 10px;
+  border-radius: 12px;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+}
+
+.risk-high { background: rgba(217,75,75,0.15); color: #D94B4B; border: 1px solid rgba(217,75,75,0.3); }
+.risk-mid  { background: rgba(232,162,61,0.15); color: #E8A23D; border: 1px solid rgba(232,162,61,0.3); }
+.risk-low  { background: rgba(63,166,125,0.15); color: #3FA67D; border: 1px solid rgba(63,166,125,0.3); }
+
+.score-bar-wrap { display: flex; align-items: center; gap: 10px; }
+.score-bar-bg { flex: 1; height: 4px; background: rgba(255,255,255,0.06); border-radius: 2px; }
+.score-bar-fill { height: 100%; border-radius: 2px; }
+
+/* ── NARRATIVE SECTIONS ── */
+.narrative {
+  display: grid;
+  grid-template-columns: 1fr 1.5fr;
+  gap: 64px;
+  align-items: start;
+  padding: 80px 48px;
+  max-width: 1280px;
+  margin: 0 auto;
+}
+
+.narrative.reverse { direction: rtl; }
+.narrative.reverse > * { direction: ltr; }
+
+.narrative-text {}
+.narrative-eyebrow {
+  font-size: 11px;
+  color: var(--cyan);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  margin-bottom: 16px;
+}
+
+.narrative-title {
+  font-family: 'DM Serif Display', serif;
+  font-size: 32px;
+  line-height: 1.2;
+  margin-bottom: 20px;
+}
+
+.narrative-body {
+  font-size: 15px;
+  color: var(--muted);
+  line-height: 1.8;
+  margin-bottom: 24px;
+}
+
+.narrative-stat {
+  display: flex;
+  gap: 32px;
+  margin-top: 32px;
+}
+
+.narrative-stat-val {
+  font-size: 32px;
+  font-weight: 700;
+  color: var(--accent);
+  line-height: 1;
+}
+
+.narrative-stat-label {
+  font-size: 11px;
+  color: var(--muted);
+  margin-top: 4px;
+}
+
+/* ── METHODOLOGY ── */
+.methodology-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+}
+
+.method-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 24px;
+}
+
+.method-icon {
+  font-size: 24px;
+  margin-bottom: 16px;
+}
+
+.method-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 8px;
+}
+
+.method-body {
+  font-size: 12px;
+  color: var(--muted);
+  line-height: 1.7;
+}
+
+/* ── FOOTER ── */
+footer {
+  border-top: 1px solid var(--border);
+  padding: 48px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.footer-left { font-size: 13px; color: var(--muted); }
+.footer-left strong { color: var(--text); }
+.footer-right { font-size: 12px; color: var(--muted); text-align: right; }
+.footer-right a { color: var(--cyan); text-decoration: none; }
+
+/* ── SCROLL REVEAL ── */
+.reveal {
+  opacity: 0;
+  transform: translateY(32px);
+  transition: opacity 0.7s ease, transform 0.7s ease;
+}
+.reveal.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+.reveal-delay-1 { transition-delay: 0.1s; }
+.reveal-delay-2 { transition-delay: 0.2s; }
+.reveal-delay-3 { transition-delay: 0.3s; }
+
+/* ── COUNTER ── */
+.counter { display: inline; }
+
+/* ── PAGE TABS ── */
+.page-tabs {
+  display: flex;
+  gap: 4px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 4px;
+  margin-bottom: 32px;
+  width: fit-content;
+}
+
+.page-tab {
+  padding: 8px 20px;
+  border-radius: 7px;
+  font-size: 12px;
+  color: var(--muted);
+  cursor: pointer;
+  transition: all 0.2s;
+  border: none;
+  background: transparent;
+  font-family: 'Inter', sans-serif;
+}
+
+.page-tab.active {
+  background: var(--surface);
+  color: var(--text);
+  border: 1px solid var(--border);
+}
+
+.page-tab:hover:not(.active) { color: var(--text); }
+
+/* ── SLICERS ── */
+.slicer-bar {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 12px 20px;
+  margin-bottom: 28px;
+  flex-wrap: wrap;
+}
+.slicer-group { display:flex; align-items:center; gap:10px; }
+.slicer-label { font-size:10px; color:var(--muted); letter-spacing:0.08em; text-transform:uppercase; white-space:nowrap; }
+.slicer-select { background:var(--surface); border:1px solid var(--border); border-radius:6px; color:var(--cyan); font-size:12px; font-family:"Inter",sans-serif; padding:6px 28px 6px 10px; outline:none; cursor:pointer; appearance:none; -webkit-appearance:none; background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%238FA3AD'/%3E%3C/svg%3E"); background-repeat:no-repeat; background-position:right 10px center; transition:border-color 0.2s; }
+.slicer-select:hover { border-color:rgba(79,195,217,0.3); }
+.slicer-select option { background:#13344A; color:#F4F1EA; }
+.slicer-range { display:flex; align-items:center; gap:8px; }
+.slicer-range input[type=range] { -webkit-appearance:none; width:120px; height:4px; border-radius:2px; background:var(--border); outline:none; cursor:pointer; }
+.slicer-range input[type=range]::-webkit-slider-thumb { -webkit-appearance:none; width:14px; height:14px; border-radius:50%; background:var(--cyan); cursor:pointer; }
+.slicer-range-val { font-size:11px; color:var(--cyan); min-width:36px; text-align:center; background:rgba(79,195,217,0.08); border:1px solid var(--border); border-radius:4px; padding:3px 6px; }
+.slicer-divider { width:1px; height:20px; background:var(--border); }
+.slicer-reset { font-size:10px; color:var(--muted); background:none; border:1px solid var(--border); border-radius:4px; padding:4px 10px; cursor:pointer; font-family:"Inter",sans-serif; transition:color 0.2s,border-color 0.2s; margin-left:auto; }
+.slicer-reset:hover { color:var(--text); border-color:rgba(79,195,217,0.3); }
+.footer-buttons { display:flex; gap:10px; margin-top:12px; flex-wrap:wrap; }
+.footer-btn { display:inline-flex; align-items:center; gap:6px; padding:8px 16px; border-radius:6px; font-size:11px; font-family:"Inter",sans-serif; font-weight:500; text-decoration:none; cursor:pointer; transition:all 0.2s; border:none; }
+.footer-btn-pbix { background:rgba(232,113,74,0.12); border:1px solid rgba(232,113,74,0.3); color:var(--accent); }
+.footer-btn-pbix:hover { background:rgba(232,113,74,0.2); border-color:var(--accent); }
+.footer-btn-pdf { background:rgba(79,195,217,0.1); border:1px solid rgba(79,195,217,0.25); color:var(--cyan); }
+.footer-btn-pdf:hover { background:rgba(79,195,217,0.18); border-color:var(--cyan); }
+
+/* ── RESPONSIVE ── */
+@media (max-width: 768px) {
+  /* NAV */
+  nav { padding: 12px 16px; }
+  .nav-links { display: none; }
+  .nav-logo { font-size: 11px; }
+
+  /* HERO */
+  .hero { padding: 0 16px 48px; min-height: 100svh; }
+  .hero-title { font-size: clamp(36px, 10vw, 56px); }
+  .hero-subtitle { font-size: 14px; margin-bottom: 28px; }
+  .hero-stats { flex-direction: column; gap: 16px; }
+  .hero-stat-value { font-size: 28px; }
+  .hero-scroll { display: none; }
+
+  /* SECTIONS */
+  section, .section-full { padding: 48px 16px; }
+  .section-title { font-size: clamp(24px, 6vw, 36px); }
+  .section-body { font-size: 14px; }
+
+  /* GRIDS → SINGLE COLUMN */
+  .kpi-grid,
+  .chart-grid-2,
+  .chart-grid-equal,
+  .methodology-grid { grid-template-columns: 1fr; }
+
+  /* INSIGHT STRIP */
+  .insight-strip { grid-template-columns: 1fr; gap: 0; }
+  .insight-item { padding: 20px; }
+  .insight-text { font-size: 14px; }
+
+  /* KPI CARDS */
+  .kpi-card { padding: 16px 18px; }
+  .kpi-value { font-size: 32px; }
+
+  /* CHART CARDS */
+  .chart-card { padding: 16px; }
+  .chart-container { height: 220px; }
+  .chart-container-tall { height: 260px; }
+  .chart-container-sm { height: 180px; }
+
+  /* SLICERS */
+  .slicer-bar {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 14px 16px;
+  }
+  .slicer-group { width: 100%; }
+  .slicer-select { width: 100%; }
+  .slicer-range { width: 100%; }
+  .slicer-range input[type=range] { width: calc(100% - 52px); }
+  .slicer-divider { display: none; }
+  .slicer-reset { margin-left: 0; width: 100%; text-align: center; }
+
+  /* VULN TABLE - horizontal scroll */
+  .vuln-table { font-size: 11px; }
+  .vuln-table th, .vuln-table td { padding: 8px 10px; }
+
+  /* METHODOLOGY */
+  .method-card { padding: 18px; }
+
+  /* FOOTER */
+  footer { flex-direction: column; gap: 20px; padding: 32px 16px; text-align: center; }
+  .footer-buttons { justify-content: center; }
+  .footer-btn { font-size: 12px; padding: 10px 18px; }
+}
+
+@media (max-width: 420px) {
+  .hero-title { font-size: 32px; }
+  .kpi-value { font-size: 28px; }
+  .chart-container { height: 190px; }
+  .chart-container-tall { height: 230px; }
+  .slicer-range input[type=range] { width: calc(100% - 48px); }
+}
+
+/* Touch improvements */
+@media (hover: none) {
+  .kpi-card:hover { transform: none; }
+  .chart-card:hover { border-color: var(--border); }
+}
+
+/* Safe area for notched phones */
+@supports (padding: max(0px)) {
+  nav { padding-left: max(16px, env(safe-area-inset-left)); padding-right: max(16px, env(safe-area-inset-right)); }
+  footer { padding-bottom: max(32px, env(safe-area-inset-bottom)); }
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-logo">🌊 Pacific at Risk</div>
+  <ul class="nav-links">
+    <li><a href="#climate">Climate Signal</a></li>
+    <li><a href="#economic">Economic Cost</a></li>
+    <li><a href="#livelihoods">Livelihoods</a></li>
+    <li><a href="#vulnerability">Vulnerability Index</a></li>
+    <li><a href="#methodology">Methodology</a></li>
+  </ul>
+</nav>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-bg"></div>
+  <svg class="hero-waves" viewBox="0 0 1440 600" preserveAspectRatio="xMidYMid slice">
+    <defs>
+      <radialGradient id="glow1" cx="70%" cy="40%" r="50%">
+        <stop offset="0%" stop-color="#4FC3D9" stop-opacity="0.15"/>
+        <stop offset="100%" stop-color="#0B1F2E" stop-opacity="0"/>
+      </radialGradient>
+      <radialGradient id="glow2" cx="20%" cy="60%" r="40%">
+        <stop offset="0%" stop-color="#E8714A" stop-opacity="0.08"/>
+        <stop offset="100%" stop-color="#0B1F2E" stop-opacity="0"/>
+      </radialGradient>
+    </defs>
+    <rect width="1440" height="600" fill="url(#glow1)"/>
+    <rect width="1440" height="600" fill="url(#glow2)"/>
+    <path d="M0 400 Q200 360 400 390 Q600 420 800 380 Q1000 340 1200 370 Q1350 390 1440 360 L1440 600 L0 600Z" fill="#0e2a3d" opacity="0.6"/>
+    <path d="M0 450 Q300 420 600 440 Q900 460 1200 430 Q1350 415 1440 435 L1440 600 L0 600Z" fill="#0a2235" opacity="0.8"/>
+  </svg>
+
+  <div class="hero-content">
+    <div class="hero-badge">Pacific Dataviz Challenge 2026</div>
+    <h1 class="hero-title">Pacific <span>at Risk</span></h1>
+    <p class="hero-subtitle">A climate-economic vulnerability analysis across 22 Pacific Island Nations — tracking how rising temperatures, sea levels, and disaster losses are reshaping lives and livelihoods across the Pacific.</p>
+    <div class="hero-stats">
+      <div>
+        <div class="hero-stat-value" data-counter="22" data-suffix="">22</div>
+        <div class="hero-stat-label">Pacific Nations Analyzed</div>
+      </div>
+      <div>
+        <div class="hero-stat-value" data-counter="7" data-suffix="">7</div>
+        <div class="hero-stat-label">Official Datasets</div>
+      </div>
+      <div>
+        <div class="hero-stat-value cyan" data-counter="959" data-suffix="M" id="kpiDisaster">959M</div>
+        <div class="hero-stat-label">Total Disaster Loss (USD)</div>
+      </div>
+      <div>
+        <div class="hero-stat-value" data-counter="0.72" data-suffix="°C">0.72°C</div>
+        <div class="hero-stat-label">Avg Temp Anomaly (2024)</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="hero-scroll">
+    <div class="hero-scroll-line"></div>
+    Scroll
+  </div>
+</div>
+
+<!-- KEY INSIGHTS -->
+<section id="overview">
+  <div class="reveal">
+    <div class="section-eyebrow">Key Findings</div>
+    <h2 class="section-title">What the data <span>reveals</span></h2>
+    <p class="section-body">Across 7 official Pacific Data Hub datasets spanning 55+ years, four critical patterns emerge that define the region's climate-economic vulnerability.</p>
+  </div>
+
+  <div class="insight-strip reveal reveal-delay-1">
+    <div class="insight-item">
+      <div class="insight-number">01</div>
+      <div class="insight-text">The Pacific has warmed by <strong>+0.72°C above baseline</strong> in 2024, with acceleration visible after 2015 — a trend consistent with global climate projections.</div>
+    </div>
+    <div class="insight-item">
+      <div class="insight-number">02</div>
+      <div class="insight-text"><strong>Fiji alone accounts for 64%</strong> of total disaster economic loss across all Pacific nations — driven largely by Cyclone Winston in 2016.</div>
+    </div>
+    <div class="insight-item">
+      <div class="insight-number">03</div>
+      <div class="insight-text">Average crop yield has <strong>declined -2.36%</strong> from early years to recent decades, coinciding with a regional rainfall deficit of <span class="cyan">-0.83 mm</span> below historical averages.</div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- PAGE 1: CLIMATE SIGNAL -->
+<section id="climate">
+  <div class="reveal">
+    <div class="section-eyebrow">Page 1 of 4 · The Climate Signal</div>
+    <h2 class="section-title">How bad is the <span>warming?</span></h2>
+    <p class="section-body">Greenhouse gas emissions, surface temperature anomalies, and sea level rise across Pacific Island Nations since 1990 — all pointing in the same direction.</p>
+  </div>
+
+  <div class="slicer-bar reveal">
+    <div class="slicer-group">
+      <span class="slicer-label">Country</span>
+      <select class="slicer-select" id="climateCountry" onchange="applyClimateFilter()">
+        <option value="all">All Countries</option>
+        <option value="Fiji">Fiji</option>
+        <option value="Vanuatu">Vanuatu</option>
+        <option value="Palau">Palau</option>
+        <option value="Solomon Islands">Solomon Islands</option>
+        <option value="Tonga">Tonga</option>
+        <option value="Samoa">Samoa</option>
+        <option value="Papua New Guinea">Papua New Guinea</option>
+        <option value="Kiribati">Kiribati</option>
+        <option value="French Polynesia">French Polynesia</option>
+        <option value="New Caledonia">New Caledonia</option>
+      </select>
+    </div>
+    <div class="slicer-divider"></div>
+    <div class="slicer-group">
+      <span class="slicer-label">From</span>
+      <div class="slicer-range">
+        <input type="range" id="climateYearFrom" min="1990" max="2024" value="1990" step="1" oninput="document.getElementById('climateYearFromVal').textContent=this.value; applyClimateFilter()">
+        <span class="slicer-range-val" id="climateYearFromVal">1990</span>
+      </div>
+    </div>
+    <div class="slicer-group">
+      <span class="slicer-label">To</span>
+      <div class="slicer-range">
+        <input type="range" id="climateYearTo" min="1990" max="2025" value="2025" step="1" oninput="document.getElementById('climateYearToVal').textContent=this.value; applyClimateFilter()">
+        <span class="slicer-range-val" id="climateYearToVal">2025</span>
+      </div>
+    </div>
+    <button class="slicer-reset" onclick="resetClimateFilter()">↺ Reset</button>
+  </div>
+
+  <div class="kpi-grid reveal reveal-delay-1">
+    <div class="kpi-card">
+      <div class="kpi-label">Avg GHG per Capita (2024)</div>
+      <div class="kpi-value" data-counter="7.25" data-suffix=" t" id="kpiGHG">7.25 t</div>
+      <div class="kpi-sub">Tonnes CO₂ equivalent · Regional average</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Avg Temp Anomaly (1990+)</div>
+      <div class="kpi-value" data-counter="0.32" data-suffix="°C" id="kpiTemp">0.32°C</div>
+      <div class="kpi-sub">°C deviation from historical baseline</div>
+    </div>
+    <div class="kpi-card cyan-top">
+      <div class="kpi-label">Avg Sea Level Anomaly</div>
+      <div class="kpi-value" data-counter="0.10" data-suffix=" m" id="kpiSea">0.10 m</div>
+      <div class="kpi-sub">Metres · Latest available year (2023)</div>
+    </div>
+  </div>
+
+  <div class="chart-grid-2 reveal reveal-delay-2">
+    <div class="chart-card">
+      <div class="chart-title">Mean Surface Temperature Anomaly over Time</div>
+      <div class="chart-subtitle">°C deviation from baseline · All countries averaged · 1990–2025</div>
+      <div class="chart-container" id="tempChart"></div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-title">Sea Level Anomaly by Year</div>
+      <div class="chart-subtitle">Metres · Regional Pacific average · 1993–2023</div>
+      <div class="chart-container" id="seaChart"></div>
+    </div>
+  </div>
+
+  <div class="chart-card reveal reveal-delay-3">
+    <div class="chart-title">GHG Emissions per Capita by Country · Latest Year (2024)</div>
+    <div class="chart-subtitle">Tonnes CO₂ equivalent · Palau is a significant outlier at 86.7t due to tiny population and diesel dependency</div>
+    <div class="chart-container chart-container-tall" id="ghgChart"></div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- PAGE 2: ECONOMIC COST -->
+<section id="economic">
+  <div class="reveal">
+    <div class="section-eyebrow">Page 2 of 4 · The Economic Cost</div>
+    <h2 class="section-title">What is climate change <span>costing?</span></h2>
+    <p class="section-body">Direct disaster economic losses and persons affected across Pacific nations — quantifying climate risk the way insurers and risk analysts do.</p>
+  </div>
+
+  <div class="slicer-bar reveal">
+    <div class="slicer-group">
+      <span class="slicer-label">Country</span>
+      <select class="slicer-select" id="economicCountry" onchange="applyEconomicFilter()">
+        <option value="all">All Countries</option>
+        <option value="Fiji">Fiji</option>
+        <option value="Vanuatu">Vanuatu</option>
+        <option value="Tonga">Tonga</option>
+        <option value="French Polynesia">French Polynesia</option>
+        <option value="Federated States of Micronesia">Federated States of Micronesia</option>
+        <option value="Samoa">Samoa</option>
+        <option value="New Caledonia">New Caledonia</option>
+        <option value="Solomon Islands">Solomon Islands</option>
+      </select>
+    </div>
+    <div class="slicer-divider"></div>
+    <div class="slicer-group">
+      <span class="slicer-label">From</span>
+      <div class="slicer-range">
+        <input type="range" id="economicYearFrom" min="2005" max="2023" value="2005" step="1" oninput="document.getElementById('economicYearFromVal').textContent=this.value; applyEconomicFilter()">
+        <span class="slicer-range-val" id="economicYearFromVal">2005</span>
+      </div>
+    </div>
+    <div class="slicer-group">
+      <span class="slicer-label">To</span>
+      <div class="slicer-range">
+        <input type="range" id="economicYearTo" min="2005" max="2023" value="2023" step="1" oninput="document.getElementById('economicYearToVal').textContent=this.value; applyEconomicFilter()">
+        <span class="slicer-range-val" id="economicYearToVal">2023</span>
+      </div>
+    </div>
+    <button class="slicer-reset" onclick="resetEconomicFilter()">↺ Reset</button>
+  </div>
+
+  <div class="kpi-grid reveal reveal-delay-1">
+    <div class="kpi-card">
+      <div class="kpi-label">Total Disaster Economic Loss</div>
+      <div class="kpi-value" data-counter="959" data-suffix="M" id="kpiDisaster">959M</div>
+      <div class="kpi-sub">USD · All Pacific nations · 2007–2020</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Total Persons Affected</div>
+      <div class="kpi-value" data-counter="2.59" data-suffix="M" id="kpiPersons">2.59M</div>
+      <div class="kpi-sub">Cumulative · All disasters · 2005–2023</div>
+    </div>
+    <div class="kpi-card cyan-top">
+      <div class="kpi-label">Avg Loss per Person Affected</div>
+      <div class="kpi-value" data-counter="370" data-suffix="" id="kpiLossPerPerson">370</div>
+      <div class="kpi-sub">USD per person affected by disasters</div>
+    </div>
+  </div>
+
+  <div class="chart-grid-2 reveal reveal-delay-2">
+    <div class="chart-card">
+      <div class="chart-title">Direct Disaster Economic Loss by Country</div>
+      <div class="chart-subtitle">USD · All available years · Fiji dominates due to Cyclone Winston 2016</div>
+      <div class="chart-container chart-container-tall" id="disasterCountryChart"></div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-title">Persons Affected by Disasters over Time</div>
+      <div class="chart-subtitle">All Pacific countries · 2005–2023</div>
+      <div class="chart-note">▲ Cyclone Winston 2016 — 633,906 persons affected in Fiji</div>
+      <div class="chart-container chart-container-tall" id="personsChart"></div>
+    </div>
+  </div>
+
+  <div class="chart-card reveal reveal-delay-3">
+    <div class="chart-title">GHG Emissions vs Disaster Economic Loss by Country</div>
+    <div class="chart-subtitle">Each bubble = one country · Higher emissions correlate with higher economic loss · Palau & New Caledonia excluded as extreme outliers</div>
+    <div class="chart-container chart-container-tall" id="scatterChart"></div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- PAGE 3: LIVELIHOODS -->
+<section id="livelihoods">
+  <div class="reveal">
+    <div class="section-eyebrow">Page 3 of 4 · Food & Livelihoods</div>
+    <h2 class="section-title">What is climate disrupting <span>on the ground?</span></h2>
+    <p class="section-body">Crop yields are declining and rainfall patterns are shifting across the Pacific — threatening the agricultural livelihoods that millions of islanders depend on.</p>
+  </div>
+
+  <div class="slicer-bar reveal">
+    <div class="slicer-group">
+      <span class="slicer-label">Country</span>
+      <select class="slicer-select" id="livelihoodsCountry" onchange="applyLivelihoodsFilter()">
+        <option value="all">All Countries</option>
+        <option value="Fiji">Fiji</option>
+        <option value="Papua New Guinea">Papua New Guinea</option>
+        <option value="Tonga">Tonga</option>
+        <option value="Samoa">Samoa</option>
+        <option value="Vanuatu">Vanuatu</option>
+        <option value="Kiribati">Kiribati</option>
+        <option value="Solomon Islands">Solomon Islands</option>
+        <option value="Marshall Islands">Marshall Islands</option>
+      </select>
+    </div>
+    <div class="slicer-divider"></div>
+    <div class="slicer-group">
+      <span class="slicer-label">From</span>
+      <div class="slicer-range">
+        <input type="range" id="livelihoodsYearFrom" min="1990" max="2024" value="1990" step="1" oninput="document.getElementById('livelihoodsYearFromVal').textContent=this.value; applyLivelihoodsFilter()">
+        <span class="slicer-range-val" id="livelihoodsYearFromVal">1990</span>
+      </div>
+    </div>
+    <div class="slicer-group">
+      <span class="slicer-label">To</span>
+      <div class="slicer-range">
+        <input type="range" id="livelihoodsYearTo" min="1990" max="2024" value="2024" step="1" oninput="document.getElementById('livelihoodsYearToVal').textContent=this.value; applyLivelihoodsFilter()">
+        <span class="slicer-range-val" id="livelihoodsYearToVal">2024</span>
+      </div>
+    </div>
+    <button class="slicer-reset" onclick="resetLivelihoodsFilter()">↺ Reset</button>
+  </div>
+
+  <div class="kpi-grid reveal reveal-delay-1">
+    <div class="kpi-card">
+      <div class="kpi-label">Avg Crop Yield (kg/ha)</div>
+      <div class="kpi-value" data-counter="75.08" data-suffix="" id="kpiCrop">75.08</div>
+      <div class="kpi-sub">Regional average · 1990–2024</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Crop Yield Change</div>
+      <div class="kpi-value" data-counter="-2.36" data-suffix="%">-2.36%</div>
+      <div class="kpi-sub">Early years vs recent decades comparison</div>
+    </div>
+    <div class="kpi-card cyan-top">
+      <div class="kpi-label">Avg Rainfall Anomaly (1990+)</div>
+      <div class="kpi-value" data-counter="-0.83" data-suffix=" mm" id="kpiRain">-0.83 mm</div>
+      <div class="kpi-sub">mm deviation · Negative = drier than historical avg</div>
+    </div>
+  </div>
+
+  <div class="chart-grid-equal reveal reveal-delay-2">
+    <div class="chart-card">
+      <div class="chart-title">Crop Yield Trend (1990–2024)</div>
+      <div class="chart-subtitle">kg per hectare · Regional average</div>
+      <div class="chart-container chart-container-tall" id="cropChart"></div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-title">Rainfall Anomaly over Time (Regional Avg)</div>
+      <div class="chart-subtitle">mm deviation · Negative = drier than historical average</div>
+      <div class="chart-container chart-container-tall" id="rainChart"></div>
+    </div>
+  </div>
+
+  <div class="chart-card reveal reveal-delay-3">
+    <div class="chart-title">Crop Yield by Country · Latest Year</div>
+    <div class="chart-subtitle">kg/ha · Sorted most vulnerable first · Lower yield = higher food insecurity</div>
+    <div class="chart-container chart-container-tall" id="cropCountryChart"></div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- PAGE 4: VULNERABILITY INDEX -->
+<section id="vulnerability">
+  <div class="reveal">
+    <div class="section-eyebrow">Page 4 of 4 · Vulnerability Index</div>
+    <h2 class="section-title">Who is most <span>at risk?</span></h2>
+    <p class="section-body">A composite Climate-Economic Vulnerability Index built from four normalized indicators — GHG emissions, disaster economic loss, persons affected, and crop yield decline — weighted to reflect analytical priority.</p>
+  </div>
+
+  <div class="slicer-bar reveal">
+    <div class="slicer-group">
+      <span class="slicer-label">Risk Category</span>
+      <select class="slicer-select" id="vulnRisk" onchange="applyVulnFilter()">
+        <option value="all">All Categories</option>
+        <option value="High Risk">🔴 High Risk</option>
+        <option value="Medium Risk">🟡 Medium Risk</option>
+        <option value="Low Risk">🟢 Low Risk</option>
+      </select>
+    </div>
+    <div class="slicer-divider"></div>
+    <div class="slicer-group">
+      <span class="slicer-label">Min Score</span>
+      <div class="slicer-range">
+        <input type="range" id="vulnMinScore" min="0" max="100" value="0" step="1" oninput="document.getElementById('vulnMinScoreVal').textContent=this.value; applyVulnFilter()">
+        <span class="slicer-range-val" id="vulnMinScoreVal">0</span>
+      </div>
+    </div>
+    <button class="slicer-reset" onclick="resetVulnFilter()">↺ Reset</button>
+  </div>
+
+  <div class="kpi-grid reveal reveal-delay-1">
+    <div class="kpi-card" style="border-color: rgba(217,75,75,0.3);">
+      <div class="kpi-label">Nations at High Risk</div>
+      <div class="kpi-value" style="color: var(--risk-high);">1</div>
+      <div class="kpi-sub">Vulnerability Index ≥ 70 · Fiji</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Avg Vulnerability Score (0–100)</div>
+      <div class="kpi-value" data-counter="27.33" data-suffix="">27.33</div>
+      <div class="kpi-sub">Regional average across 21 nations</div>
+    </div>
+    <div class="kpi-card cyan-top">
+      <div class="kpi-label">Avg Disaster Loss</div>
+      <div class="kpi-value" data-counter="25" data-suffix="M">25M</div>
+      <div class="kpi-sub">USD per country · All available years</div>
+    </div>
+  </div>
+
+  <div class="chart-grid-2 reveal reveal-delay-2">
+    <div class="chart-card">
+      <div class="chart-title">Climate-Economic Vulnerability Index by Country</div>
+      <div class="chart-subtitle">Composite score 0–100 · Higher = more vulnerable</div>
+      <div class="chart-container chart-container-tall" id="vulnChart"></div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-title">Risk Distribution across Pacific Nations</div>
+      <div class="chart-subtitle">Countries by risk category</div>
+      <div class="chart-container" id="donutChart"></div>
+    </div>
+  </div>
+
+  <!-- Vulnerability Table -->
+  <div class="chart-card reveal reveal-delay-3">
+    <div class="chart-title" style="margin-bottom:4px;">Vulnerability Score Components by Country</div>
+    <div class="chart-subtitle">All component scores normalized 0–100 · Weighted composite index</div>
+    <div style="overflow-x:auto; margin-top:16px;">
+      <table class="vuln-table" id="vulnTable"></table>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- METHODOLOGY -->
+<section id="methodology">
+  <div class="reveal">
+    <div class="section-eyebrow">Methodology</div>
+    <h2 class="section-title">How this was <span class="cyan">built</span></h2>
+    <p class="section-body">All data sourced from the Pacific Data Hub's official .Stat Explorer. Seven datasets processed and combined to produce this analysis.</p>
+  </div>
+
+  <div class="methodology-grid reveal reveal-delay-1">
+    <div class="method-card">
+      <div class="method-icon">📊</div>
+      <div class="method-title">Data Sources</div>
+      <div class="method-body">7 official Pacific Data Hub datasets covering GHG emissions, temperature anomalies, sea level, rainfall, crop yield, disaster loss, persons affected, and renewable energy.</div>
+    </div>
+    <div class="method-card">
+      <div class="method-icon">🔧</div>
+      <div class="method-title">Tools Used</div>
+      <div class="method-body">Power BI for interactive dashboard. Python for data cleaning and vulnerability index calculation. HTML/CSS/ECharts for this narrative website.</div>
+    </div>
+    <div class="method-card">
+      <div class="method-icon">📐</div>
+      <div class="method-title">Vulnerability Index</div>
+      <div class="method-body">Min-max normalized composite of 4 indicators: GHG (20%), Disaster Loss (35%), Persons Affected (25%), Crop Yield vulnerability (20%).</div>
+    </div>
+    <div class="method-card">
+      <div class="method-icon">🌏</div>
+      <div class="method-title">Coverage</div>
+      <div class="method-body">22 Pacific Island Countries and Territories. Year ranges vary by dataset: 1850–2025 (temperature), 1961–2024 (crop yield), 2005–2023 (disaster data).</div>
+    </div>
+  </div>
+
+  <div class="insight-strip reveal reveal-delay-2" style="margin-top:32px;">
+    <div class="insight-item">
+      <div class="insight-number">Weight</div>
+      <div class="insight-text"><strong>GHG Score: 20%</strong><br/>Higher per-capita emissions = higher score</div>
+    </div>
+    <div class="insight-item">
+      <div class="insight-number">Weight</div>
+      <div class="insight-text"><strong>Disaster Loss: 35%</strong><br/>Economic loss dominates — highest analytical weight</div>
+    </div>
+    <div class="insight-item">
+      <div class="insight-number">Weight</div>
+      <div class="insight-text"><strong>Persons Affected: 25%</strong> + <strong>Crop Score: 20%</strong><br/>Human impact and food security complete the index</div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-left">
+    <strong>Pacific at Risk</strong> · Pacific Dataviz Challenge 2026<br/>
+    Data: Pacific Data Hub .Stat Explorer · pacificdata.org
+  </div>
+  <div class="footer-right">
+    Built by <a href="https://venkataharsha01.github.io" target="_blank">Venkata Harsha</a><br/>
+    Power BI · Claude · ECharts
+    <div class="footer-buttons">
+      <a href="Dataviz_dashboard.pbix" download class="footer-btn footer-btn-pbix">
+        ⬇ Download .pbix
+      </a>
+      <a href="Dataviz_dashboard.pdf" download class="footer-btn footer-btn-pdf">
+        ⬇ Download PDF
+      </a>
+    </div>
+  </div>
+</footer>
+
+<script>
+// ── DATA ──
+const DATA = {
+  temp: {1990:0.095,1991:0.114,1992:-0.014,1993:-0.155,1994:0.041,1995:0.255,1996:0.182,1997:0.005,1998:0.055,1999:0.1,2000:0.15,2001:0.286,2002:0.382,2003:0.395,2004:0.35,2005:0.4,2006:0.323,2007:0.373,2008:0.127,2009:0.35,2010:0.355,2011:0.168,2012:0.277,2013:0.405,2014:0.464,2015:0.327,2016:0.586,2017:0.609,2018:0.532,2019:0.559,2020:0.595,2021:0.45,2022:0.455,2023:0.582,2024:0.723,2025:0.627},
+  sea: {1993:-0.019,1994:-0.005,1995:0.0,1996:0.019,1997:-0.019,1998:-0.062,1999:0.014,2000:0.033,2001:0.024,2002:0.014,2003:0.01,2004:0.029,2005:0.029,2006:0.043,2007:0.062,2008:0.081,2009:0.057,2010:0.024,2011:0.076,2012:0.067,2013:0.067,2014:0.052,2015:0.029,2016:0.033,2017:0.1,2018:0.086,2019:0.09,2020:0.1,2021:0.124,2022:0.133,2023:0.105},
+  ghgLatest: {Palau:86.7,'New Caledonia':18.4,'French Polynesia':3.8,Fiji:3.0,Tonga:2.8,Samoa:2.4,Vanuatu:1.9,'Papua New Guinea':1.0,Kiribati:0.9,'Solomon Islands':0.8},
+  disasterCountry: {Fiji:616943838,Vanuatu:151268336,Tonga:35979538,'French Polynesia':30220000,'Federated States of Micronesia':28777200,Samoa:22048411,'New Caledonia':20310000,'Solomon Islands':19674952},
+  personsYear: {2005:1123,2006:276,2007:77643,2008:37438,2009:20101,2010:13043,2011:973,2012:39029,2013:7841,2014:19827,2015:195993,2016:733906,2017:59418,2018:462927,2019:144992,2020:548988,2021:119258,2022:105309,2023:138},
+  scatterData: [
+    {name:'Fiji',ghg:3.0,loss:617,size:30},
+    {name:'Vanuatu',ghg:1.9,loss:151,size:18},
+    {name:'Tonga',ghg:2.8,loss:36,size:10},
+    {name:'French Polynesia',ghg:3.8,loss:30,size:9},
+    {name:'Federated States of Micronesia',ghg:0.5,loss:29,size:9},
+    {name:'Samoa',ghg:2.4,loss:22,size:8},
+    {name:'Solomon Islands',ghg:0.8,loss:20,size:8},
+    {name:'Marshall Islands',ghg:0.1,loss:5,size:5},
+    {name:'Kiribati',ghg:0.9,loss:1,size:4},
+    {name:'Papua New Guinea',ghg:1.0,loss:4,size:4},
+  ],
+  cropTrend: {1990:72.24,1991:70.5,1992:69.8,1993:68.9,1994:68.2,1995:70.75,1996:69.42,1997:68.46,1998:65.38,1999:72.13,2000:70.12,2001:65.66,2002:67.23,2003:67.84,2004:68.51,2005:67.13,2006:70.01,2007:68.58,2008:67.88,2009:67.09,2010:75.71,2011:76.2,2012:76.99,2013:76.7,2014:78.75,2015:79.96,2016:77.53,2017:80.12,2018:79.8,2019:78.76,2020:75.15,2021:73.75,2022:77.25,2023:78.98,2024:68.5},
+  rainTrend: {1990:2.818,1991:-2.123,1992:-2.736,1993:1.35,1994:-1.477,1995:-2.05,1996:-3.564,1997:1.164,1998:-10.718,1999:-3.132,2000:-4.664,2001:-1.018,2002:3.027,2003:0.177,2004:2.405,2005:2.286,2006:2.536,2007:3.464,2008:-8.232,2009:1.395,2010:-3.414,2011:-6.291,2012:2.295,2013:1.636,2014:3.018,2015:2.841,2016:-0.85,2017:0.85,2018:-0.432,2019:19.75,2020:2.527,2021:-6.468,2022:-7.1,2023:3.445,2024:1.459},
+  cropCountry: {Niue:15.2,Tuvalu:18.4,'Marshall Islands':45.8,'Federated States of Micronesia':52.1,Kiribati:62.3,Vanuatu:66.5,Samoa:88.2,Tonga:112.4,'Papua New Guinea':145.6,Fiji:267.9},
+  vuln: [
+    {country:'Fiji',ghg:1.40,disaster:164.92,persons:195.83,crop:43.33,index:100.00,risk:'High Risk'},
+    {country:'Vanuatu',ghg:1.38,disaster:40.43,persons:43.22,crop:93.76,index:43.98,risk:'Medium Risk'},
+    {country:'Solomon Islands',ghg:0.45,disaster:5.25,persons:88.76,crop:88.74,index:41.87,risk:'Medium Risk'},
+    {country:'Palau',ghg:62.95,disaster:3.25,persons:5.92,crop:100.79,index:35.37,risk:'Low Risk'},
+    {country:'Marshall Islands',ghg:0.05,disaster:1.90,persons:28.46,crop:94.57,index:26.70,risk:'Low Risk'},
+    {country:'Tonga',ghg:0.93,disaster:9.61,persons:14.19,crop:89.44,index:24.99,risk:'Low Risk'},
+    {country:'Papua New Guinea',ghg:0.56,disaster:3.72,persons:15.67,crop:89.07,index:23.15,risk:'Low Risk'},
+    {country:'Samoa',ghg:0.90,disaster:5.89,persons:4.64,crop:92.89,index:21.98,risk:'Low Risk'},
+    {country:'New Caledonia',ghg:6.28,disaster:5.42,persons:0.00,crop:91.98,index:21.55,risk:'Low Risk'},
+    {country:'French Polynesia',ghg:1.65,disaster:8.07,persons:0.00,crop:91.21,index:21.40,risk:'Low Risk'},
+    {country:'Kiribati',ghg:0.31,disaster:0.07,persons:0.47,crop:93.96,index:19.00,risk:'Low Risk'},
+  ]
+};
+
+// ── COLORS ──
+const C = {
+  bg: '#0B1F2E', surface: '#13344A',
+  accent: '#E8714A', cyan: '#4FC3D9',
+  muted: '#8FA3AD', text: '#F4F1EA',
+  high: '#D94B4B', mid: '#E8A23D', low: '#3FA67D',
+  grid: 'rgba(79,195,217,0.08)'
+};
+
+const baseAxis = {
+  axisLine: { lineStyle: { color: C.muted } },
+  axisTick: { show: false },
+  axisLabel: { color: C.muted, fontSize: 10 },
+  splitLine: { lineStyle: { color: C.grid } }
+};
+
+// ── CHART INIT HELPER ──
+function initChart(id) {
+  const el = document.getElementById(id);
+  if (!el) return null;
+  const chart = echarts.init(el, null, { renderer: 'canvas' });
+  window.addEventListener('resize', () => chart.resize());
+  return chart;
+}
+
+// ── TEMPERATURE CHART ──
+function buildTempChart() {
+  const chart = initChart('tempChart');
+  charts.temp = chart;
+  if (!chart) return;
+  const years = Object.keys(DATA.temp).map(Number);
+  const vals = Object.values(DATA.temp);
+  chart.setOption({
+    backgroundColor: 'transparent',
+    grid: { top:10, right:16, bottom:24, left:44 },
+    tooltip: { trigger:'axis', backgroundColor:'#13344A', borderColor:C.cyan, borderWidth:1, textStyle:{color:C.text,fontSize:11},
+      formatter: p => `<b>${p[0].axisValue}</b><br/>Temp anomaly: <span style="color:${C.accent}">${p[0].value}°C</span>` },
+    xAxis: { ...baseAxis, type:'category', data:years, splitLine:{show:false} },
+    yAxis: { ...baseAxis, type:'value', name:'°C', nameTextStyle:{color:C.muted,fontSize:10}, splitLine:{lineStyle:{color:C.grid}} },
+    series: [{
+      type:'line', data:vals, smooth:0.3,
+      lineStyle: { color:C.accent, width:2.5 },
+      itemStyle: { color:C.accent },
+      symbol:'none',
+      areaStyle: { color:{ type:'linear', x:0,y:0,x2:0,y2:1, colorStops:[{offset:0,color:'rgba(232,113,74,0.3)'},{offset:1,color:'rgba(232,113,74,0.02)'}] } },
+      markLine: { silent:true, lineStyle:{color:C.muted,type:'dashed',width:1}, data:[{yAxis:0, label:{formatter:'baseline',color:C.muted,fontSize:9}}] }
+    }]
+  });
+}
+
+// ── SEA LEVEL CHART ──
+function buildSeaChart() {
+  const chart = initChart('seaChart');
+  charts.sea = chart;
+  if (!chart) return;
+  const years = Object.keys(DATA.sea).map(Number);
+  const vals = Object.values(DATA.sea);
+  chart.setOption({
+    backgroundColor:'transparent',
+    grid:{top:10,right:16,bottom:24,left:48},
+    tooltip:{trigger:'axis',backgroundColor:'#13344A',borderColor:C.cyan,borderWidth:1,textStyle:{color:C.text,fontSize:11},
+      formatter:p=>`<b>${p[0].axisValue}</b><br/>Sea level: <span style="color:${C.cyan}">${p[0].value} m</span>`},
+    xAxis:{...baseAxis,type:'category',data:years,splitLine:{show:false}},
+    yAxis:{...baseAxis,type:'value',name:'m',nameTextStyle:{color:C.muted,fontSize:10}},
+    series:[{
+      type:'line',data:vals,smooth:0.4,
+      lineStyle:{color:C.cyan,width:2.5},
+      itemStyle:{color:C.cyan},
+      symbol:'none',
+      areaStyle:{color:{type:'linear',x:0,y:0,x2:0,y2:1,colorStops:[{offset:0,color:'rgba(79,195,217,0.25)'},{offset:1,color:'rgba(79,195,217,0.02)'}]}},
+      markLine:{silent:true,lineStyle:{color:C.muted,type:'dashed',width:1},data:[{yAxis:0}]}
+    }]
+  });
+}
+
+// ── GHG BY COUNTRY ──
+function buildGHGChart() {
+  const chart = initChart('ghgChart');
+  charts.ghg = chart;
+  if (!chart) return;
+  const countries = Object.keys(DATA.ghgLatest).reverse();
+  const vals = countries.map(c => DATA.ghgLatest[c]);
+  const colors = vals.map((v,i) => countries[i]==='Palau' ? C.accent : C.cyan);
+  chart.setOption({
+    backgroundColor:'transparent',
+    grid:{top:10,right:80,bottom:10,left:140},
+    tooltip:{trigger:'axis',axisPointer:{type:'none'},backgroundColor:'#13344A',borderColor:C.cyan,borderWidth:1,textStyle:{color:C.text,fontSize:11},
+      formatter:p=>`<b>${p[0].name}</b><br/>GHG: <span style="color:${C.accent}">${p[0].value} t/capita</span>`},
+    xAxis:{...baseAxis,type:'value',name:'Tonnes CO₂/capita',nameTextStyle:{color:C.muted,fontSize:10},splitLine:{lineStyle:{color:C.grid}}},
+    yAxis:{...baseAxis,type:'category',data:countries,axisLabel:{color:C.muted,fontSize:10},splitLine:{show:false}},
+    series:[{
+      type:'bar',data:vals,barMaxWidth:18,
+      itemStyle:{color:p=>colors[p.dataIndex],borderRadius:[0,4,4,0]},
+      label:{show:true,position:'right',color:C.muted,fontSize:10,formatter:p=>`${p.value}t`}
+    }]
+  });
+}
+
+// ── DISASTER BY COUNTRY ──
+function buildDisasterCountryChart() {
+  const chart = initChart('disasterCountryChart');
+  charts.disasterCountry = chart;
+  if (!chart) return;
+  const countries = Object.keys(DATA.disasterCountry).reverse();
+  const vals = countries.map(c => +(DATA.disasterCountry[c]/1000000).toFixed(1));
+  chart.setOption({
+    backgroundColor:'transparent',
+    grid:{top:10,right:80,bottom:10,left:190},
+    tooltip:{trigger:'axis',axisPointer:{type:'none'},backgroundColor:'#13344A',borderColor:C.cyan,borderWidth:1,textStyle:{color:C.text,fontSize:11},
+      formatter:p=>`<b>${p[0].name}</b><br/>Loss: <span style="color:${C.accent}">$${p[0].value}M</span>`},
+    xAxis:{...baseAxis,type:'value',name:'USD Millions',nameTextStyle:{color:C.muted,fontSize:10},splitLine:{lineStyle:{color:C.grid}}},
+    yAxis:{...baseAxis,type:'category',data:countries,splitLine:{show:false}},
+    series:[{
+      type:'bar',data:vals,barMaxWidth:16,
+      itemStyle:{color:p=>p.name==='Fiji'?C.accent:C.cyan,borderRadius:[0,4,4,0]},
+      label:{show:true,position:'right',color:C.muted,fontSize:10,formatter:p=>`$${p.value}M`}
+    }]
+  });
+}
+
+// ── PERSONS CHART ──
+function buildPersonsChart() {
+  const chart = initChart('personsChart');
+  charts.persons = chart;
+  if (!chart) return;
+  const years = Object.keys(DATA.personsYear).map(Number);
+  const vals = years.map(y => +(DATA.personsYear[y]/1000).toFixed(1));
+  chart.setOption({
+    backgroundColor:'transparent',
+    grid:{top:20,right:16,bottom:24,left:56},
+    tooltip:{trigger:'axis',backgroundColor:'#13344A',borderColor:C.cyan,borderWidth:1,textStyle:{color:C.text,fontSize:11},
+      formatter:p=>`<b>${p[0].axisValue}</b><br/>Persons affected: <span style="color:${C.cyan}">${p[0].value}K</span>`},
+    xAxis:{...baseAxis,type:'category',data:years,splitLine:{show:false}},
+    yAxis:{...baseAxis,type:'value',name:'Thousands',nameTextStyle:{color:C.muted,fontSize:10}},
+    series:[{
+      type:'bar',data:vals,barMaxWidth:28,
+      itemStyle:{color:p=>p.dataIndex===11?C.accent:C.cyan,borderRadius:[4,4,0,0]},
+      markPoint:{data:[{type:'max',label:{color:C.accent,fontSize:10},itemStyle:{color:'transparent'}}]}
+    }]
+  });
+}
+
+// ── SCATTER CHART ──
+function buildScatterChart() {
+  const chart = initChart('scatterChart');
+  charts.scatter = chart;
+  if (!chart) return;
+  chart.setOption({
+    backgroundColor:'transparent',
+    grid:{top:20,right:20,bottom:40,left:60},
+    tooltip:{trigger:'item',backgroundColor:'#13344A',borderColor:C.cyan,borderWidth:1,textStyle:{color:C.text,fontSize:11},
+      formatter:p=>`<b>${p.data.name}</b><br/>GHG: ${p.data.value[0]}t/capita<br/>Disaster loss: $${p.data.value[1]}M`},
+    xAxis:{...baseAxis,type:'value',name:'GHG Emissions (t/capita)',nameLocation:'middle',nameGap:28,nameTextStyle:{color:C.muted,fontSize:10},splitLine:{lineStyle:{color:C.grid}}},
+    yAxis:{...baseAxis,type:'value',name:'Disaster Loss ($M)',nameLocation:'middle',nameGap:44,nameTextStyle:{color:C.muted,fontSize:10}},
+    series:[{
+      type:'scatter',
+      data:DATA.scatterData.map(d=>({name:d.name,value:[d.ghg,d.loss],symbolSize:d.size*2.5})),
+      itemStyle:{color:p=>p.data.name==='Fiji'?C.accent:C.cyan,opacity:0.85},
+      label:{show:true,position:'top',color:C.muted,fontSize:9,formatter:p=>p.data.name}
+    }]
+  });
+}
+
+// ── CROP TREND ──
+function buildCropChart() {
+  const chart = initChart('cropChart');
+  charts.crop = chart;
+  if (!chart) return;
+  const years = Object.keys(DATA.cropTrend).map(Number);
+  const vals = Object.values(DATA.cropTrend);
+  chart.setOption({
+    backgroundColor:'transparent',
+    grid:{top:10,right:16,bottom:24,left:48},
+    tooltip:{trigger:'axis',backgroundColor:'#13344A',borderColor:C.cyan,borderWidth:1,textStyle:{color:C.text,fontSize:11},
+      formatter:p=>`<b>${p[0].axisValue}</b><br/>Crop yield: <span style="color:${C.cyan}">${p[0].value} kg/ha</span>`},
+    xAxis:{...baseAxis,type:'category',data:years,splitLine:{show:false}},
+    yAxis:{...baseAxis,type:'value',name:'kg/ha',nameTextStyle:{color:C.muted,fontSize:10}},
+    series:[{
+      type:'line',data:vals,smooth:0.3,
+      lineStyle:{color:C.cyan,width:2.5},
+      itemStyle:{color:C.cyan},
+      symbol:'none',
+      areaStyle:{color:{type:'linear',x:0,y:0,x2:0,y2:1,colorStops:[{offset:0,color:'rgba(79,195,217,0.2)'},{offset:1,color:'rgba(79,195,217,0.02)'}]}}
+    }]
+  });
+}
+
+// ── RAINFALL CHART ──
+function buildRainChart() {
+  const chart = initChart('rainChart');
+  charts.rain = chart;
+  if (!chart) return;
+  const years = Object.keys(DATA.rainTrend).map(Number);
+  const vals = Object.values(DATA.rainTrend);
+  chart.setOption({
+    backgroundColor:'transparent',
+    grid:{top:10,right:16,bottom:24,left:52},
+    tooltip:{trigger:'axis',backgroundColor:'#13344A',borderColor:C.cyan,borderWidth:1,textStyle:{color:C.text,fontSize:11},
+      formatter:p=>`<b>${p[0].axisValue}</b><br/>Rainfall anomaly: <span style="color:${C.cyan}">${p[0].value} mm</span>`},
+    xAxis:{...baseAxis,type:'category',data:years,splitLine:{show:false}},
+    yAxis:{...baseAxis,type:'value',name:'mm',nameTextStyle:{color:C.muted,fontSize:10}},
+    series:[{
+      type:'line',data:vals,smooth:0.2,
+      lineStyle:{color:C.cyan,width:2},
+      itemStyle:{color:C.cyan},
+      symbol:'none',
+      areaStyle:{color:{type:'linear',x:0,y:0,x2:0,y2:1,colorStops:[{offset:0,color:'rgba(79,195,217,0.15)'},{offset:1,color:'rgba(79,195,217,0.01)'}]}},
+      markLine:{silent:true,lineStyle:{color:C.accent,type:'dashed',width:1},data:[{yAxis:0,label:{formatter:'baseline',color:C.muted,fontSize:9}}]}
+    }]
+  });
+}
+
+// ── CROP BY COUNTRY ──
+function buildCropCountryChart() {
+  const chart = initChart('cropCountryChart');
+  charts.cropCountry = chart;
+  if (!chart) return;
+  const countries = Object.keys(DATA.cropCountry);
+  const vals = Object.values(DATA.cropCountry);
+  chart.setOption({
+    backgroundColor:'transparent',
+    grid:{top:10,right:80,bottom:10,left:190},
+    tooltip:{trigger:'axis',axisPointer:{type:'none'},backgroundColor:'#13344A',borderColor:C.cyan,borderWidth:1,textStyle:{color:C.text,fontSize:11},
+      formatter:p=>`<b>${p[0].name}</b><br/>Yield: <span style="color:${C.cyan}">${p[0].value} kg/ha</span>`},
+    xAxis:{...baseAxis,type:'value',name:'kg/ha',nameTextStyle:{color:C.muted,fontSize:10},splitLine:{lineStyle:{color:C.grid}}},
+    yAxis:{...baseAxis,type:'category',data:countries,splitLine:{show:false}},
+    series:[{
+      type:'bar',data:vals,barMaxWidth:16,
+      itemStyle:{color:p=>p.value<50?C.high:p.value<100?C.accent:C.cyan,borderRadius:[0,4,4,0]},
+      label:{show:true,position:'right',color:C.muted,fontSize:10,formatter:p=>`${p.value}`}
+    }]
+  });
+}
+
+// ── VULNERABILITY CHART ──
+function buildVulnChart() {
+  const chart = initChart('vulnChart');
+  charts.vuln = chart;
+  if (!chart) return;
+  const sorted = [...DATA.vuln].sort((a,b)=>a.index-b.index);
+  chart.setOption({
+    backgroundColor:'transparent',
+    grid:{top:10,right:80,bottom:10,left:140},
+    tooltip:{trigger:'axis',axisPointer:{type:'none'},backgroundColor:'#13344A',borderColor:C.cyan,borderWidth:1,textStyle:{color:C.text,fontSize:11},
+      formatter:p=>{const d=DATA.vuln.find(v=>v.country===p[0].name);return`<b>${p[0].name}</b><br/>Score: <span style="color:${C.accent}">${p[0].value}</span><br/>Risk: ${d?d.risk:''}`}},
+    xAxis:{...baseAxis,type:'value',max:100,splitLine:{lineStyle:{color:C.grid}}},
+    yAxis:{...baseAxis,type:'category',data:sorted.map(d=>d.country),splitLine:{show:false}},
+    series:[{
+      type:'bar',data:sorted.map(d=>d.index),barMaxWidth:16,
+      itemStyle:{color:p=>{
+        const idx=sorted[p.dataIndex].index;
+        return idx>=70?C.high:idx>=40?C.mid:C.low;
+      },borderRadius:[0,4,4,0]},
+      label:{show:true,position:'right',color:C.muted,fontSize:10,formatter:p=>p.value.toFixed(1)}
+    }]
+  });
+}
+
+// ── DONUT CHART ──
+function buildDonutChart() {
+  const chart = initChart('donutChart');
+  if (!chart) return;
+  const high = DATA.vuln.filter(d=>d.risk==='High Risk').length;
+  const mid = DATA.vuln.filter(d=>d.risk==='Medium Risk').length;
+  const low = DATA.vuln.filter(d=>d.risk==='Low Risk').length;
+  chart.setOption({
+    backgroundColor:'transparent',
+    tooltip:{trigger:'item',backgroundColor:'#13344A',borderColor:C.cyan,borderWidth:1,textStyle:{color:C.text,fontSize:11}},
+    legend:{bottom:0,textStyle:{color:C.muted,fontSize:11}},
+    series:[{
+      type:'pie',radius:['45%','72%'],
+      itemStyle:{borderColor:'#0B1F2E',borderWidth:3},
+      label:{show:true,formatter:'{b}\n{c} nations',color:C.text,fontSize:11},
+      labelLine:{lineStyle:{color:C.muted}},
+      data:[
+        {name:'High Risk',value:high,itemStyle:{color:C.high}},
+        {name:'Medium Risk',value:mid,itemStyle:{color:C.mid}},
+        {name:'Low Risk',value:low,itemStyle:{color:C.low}},
+      ]
+    }]
+  });
+}
+
+// ── VULNERABILITY TABLE ──
+function buildVulnTable() {
+  const table = document.getElementById('vulnTable');
+  if (!table) return;
+  const headers = ['Country','GHG Score','Disaster Score','Persons Score','Crop Score','Vulnerability Index','Risk'];
+  table.innerHTML = `<thead><tr>${headers.map(h=>`<th>${h}</th>`).join('')}</tr></thead>`;
+  const tbody = document.createElement('tbody');
+  DATA.vuln.forEach(d => {
+    const riskClass = d.risk==='High Risk'?'risk-high':d.risk==='Medium Risk'?'risk-mid':'risk-low';
+    const barColor = d.risk==='High Risk'?C.high:d.risk==='Medium Risk'?C.mid:C.low;
+    tbody.innerHTML += `<tr>
+      <td style="font-weight:500">${d.country}</td>
+      <td>${d.ghg.toFixed(2)}</td>
+      <td>${d.disaster.toFixed(2)}</td>
+      <td>${d.persons.toFixed(2)}</td>
+      <td>${d.crop.toFixed(2)}</td>
+      <td>
+        <div class="score-bar-wrap">
+          <span style="min-width:36px;color:${barColor};font-weight:600">${d.index.toFixed(1)}</span>
+          <div class="score-bar-bg"><div class="score-bar-fill" style="width:${d.index}%;background:${barColor}"></div></div>
+        </div>
+      </td>
+      <td><span class="risk-badge ${riskClass}">${d.risk}</span></td>
+    </tr>`;
+  });
+  table.appendChild(tbody);
+}
+
+// ── SCROLL REVEAL ──
+function setupReveal() {
+  const els = document.querySelectorAll('.reveal');
+  const obs = new IntersectionObserver((entries) => {
+    entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+  }, { threshold: 0.1 });
+  els.forEach(el => obs.observe(el));
+}
+
+// ── ANIMATED COUNTERS ──
+function animateCounter(el) {
+  const target = parseFloat(el.dataset.counter);
+  const suffix = el.dataset.suffix || '';
+  const duration = 1500;
+  const start = performance.now();
+  const isNeg = target < 0;
+  const abs = Math.abs(target);
+  function update(now) {
+    const elapsed = now - start;
+    const progress = Math.min(elapsed / duration, 1);
+    const ease = 1 - Math.pow(1 - progress, 3);
+    const current = abs * ease;
+    const decimals = abs < 10 ? 2 : abs < 100 ? 1 : 0;
+    el.textContent = (isNeg ? '-' : '') + current.toFixed(decimals) + suffix;
+    if (progress < 1) requestAnimationFrame(update);
+  }
+  requestAnimationFrame(update);
+}
+
+function setupCounters() {
+  const obs = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting && !e.target.dataset.counted) {
+        e.target.dataset.counted = '1';
+        animateCounter(e.target);
+      }
+    });
+  }, { threshold: 0.5 });
+  document.querySelectorAll('[data-counter]').forEach(el => obs.observe(el));
+}
+
+// ── INIT ──
+
+// ── CHART REFERENCES ──
+const charts = {};
+
+// ── GLOBAL FILTER STATE ──
+const FILTER = {
+  country: 'all',
+  yearFrom: 1990,
+  yearTo: 2025,
+  risk: 'all',
+  minScore: 0
+};
+
+// ── SYNC ALL SLICERS TO MATCH GLOBAL STATE ──
+function syncSlicers() {
+  const c = FILTER.country;
+  const yf = FILTER.yearFrom;
+  const yt = FILTER.yearTo;
+
+  // Country dropdowns
+  ['climateCountry','economicCountry','livelihoodsCountry'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) {
+      // check if this option exists
+      const opts = Array.from(el.options).map(o => o.value);
+      el.value = opts.includes(c) ? c : 'all';
+    }
+  });
+
+  // Climate year sliders
+  const cf = document.getElementById('climateYearFrom');
+  const ct = document.getElementById('climateYearTo');
+  if (cf) { cf.value = Math.max(1990, yf); document.getElementById('climateYearFromVal').textContent = cf.value; }
+  if (ct) { ct.value = Math.min(2025, yt); document.getElementById('climateYearToVal').textContent = ct.value; }
+
+  // Economic year sliders
+  const ef = document.getElementById('economicYearFrom');
+  const et = document.getElementById('economicYearTo');
+  if (ef) { ef.value = Math.max(2005, yf); document.getElementById('economicYearFromVal').textContent = ef.value; }
+  if (et) { et.value = Math.min(2023, yt); document.getElementById('economicYearToVal').textContent = et.value; }
+
+  // Livelihoods year sliders
+  const lf = document.getElementById('livelihoodsYearFrom');
+  const lt = document.getElementById('livelihoodsYearTo');
+  if (lf) { lf.value = Math.max(1990, yf); document.getElementById('livelihoodsYearFromVal').textContent = lf.value; }
+  if (lt) { lt.value = Math.min(2024, yt); document.getElementById('livelihoodsYearToVal').textContent = lt.value; }
+}
+
+// ── UPDATE ALL CHARTS ──
+function updateAllCharts() {
+  const { country, yearFrom, yearTo } = FILTER;
+
+  // --- TEMPERATURE ---
+  const tempYears = Object.keys(DATA.temp).map(Number).filter(y => y >= yearFrom && y <= yearTo);
+  const tempVals = tempYears.map(y => DATA.temp[y]);
+  if (charts.temp) charts.temp.setOption({ xAxis:{data:tempYears}, series:[{data:tempVals}] });
+
+  // --- SEA LEVEL ---
+  const seaYears = Object.keys(DATA.sea).map(Number).filter(y => y >= Math.max(1993,yearFrom) && y <= Math.min(2023,yearTo));
+  const seaVals = seaYears.map(y => DATA.sea[y]);
+  if (charts.sea) charts.sea.setOption({ xAxis:{data:seaYears}, series:[{data:seaVals}] });
+
+  // --- GHG BAR ---
+  let ghgC = Object.keys(DATA.ghgLatest);
+  if (country !== 'all') ghgC = ghgC.filter(c => c === country);
+  const ghgRev = [...ghgC].reverse();
+  const ghgV = ghgRev.map(c => DATA.ghgLatest[c] || 0);
+  const ghgColors = ghgRev.map(c => c === 'Palau' ? C.accent : C.cyan);
+  if (charts.ghg) charts.ghg.setOption({ yAxis:{data:ghgRev}, series:[{data:ghgV, itemStyle:{color:p=>ghgColors[p.dataIndex]}}] });
+
+  // --- DISASTER BAR ---
+  let disC = Object.keys(DATA.disasterCountry);
+  if (country !== 'all') disC = disC.filter(c => c === country);
+  const disRev = [...disC].reverse();
+  const disV = disRev.map(c => +((DATA.disasterCountry[c]||0)/1000000).toFixed(1));
+  if (charts.disasterCountry) charts.disasterCountry.setOption({ yAxis:{data:disRev}, series:[{data:disV, itemStyle:{color:p=>disRev[p.dataIndex]==='Fiji'?C.accent:C.cyan}}] });
+
+  // --- PERSONS CHART ---
+  const persYears = Object.keys(DATA.personsYear).map(Number).filter(y => y >= Math.max(2005,yearFrom) && y <= Math.min(2023,yearTo));
+  const persV = persYears.map(y => +(DATA.personsYear[y]/1000).toFixed(1));
+  if (charts.persons) charts.persons.setOption({ xAxis:{data:persYears}, series:[{data:persV}] });
+
+  // --- SCATTER ---
+  let scatterF = DATA.scatterData;
+  if (country !== 'all') scatterF = DATA.scatterData.filter(d => d.name === country);
+  if (charts.scatter) charts.scatter.setOption({ series:[{data:scatterF.map(d=>({name:d.name,value:[d.ghg,d.loss],symbolSize:d.size*2.5}))}] });
+
+  // --- CROP TREND ---
+  const cropYears = Object.keys(DATA.cropTrend).map(Number).filter(y => y >= Math.max(1990,yearFrom) && y <= Math.min(2024,yearTo));
+  const cropV = cropYears.map(y => DATA.cropTrend[y]);
+  if (charts.crop) charts.crop.setOption({ xAxis:{data:cropYears}, series:[{data:cropV}] });
+
+  // --- RAINFALL ---
+  const rainYears = Object.keys(DATA.rainTrend).map(Number).filter(y => y >= Math.max(1990,yearFrom) && y <= Math.min(2025,yearTo));
+  const rainV = rainYears.map(y => DATA.rainTrend[y]);
+  if (charts.rain) charts.rain.setOption({ xAxis:{data:rainYears}, series:[{data:rainV}] });
+
+  // --- CROP BY COUNTRY ---
+  let cropC = Object.keys(DATA.cropCountry);
+  if (country !== 'all') cropC = cropC.filter(c => c === country);
+  const cropCV = cropC.map(c => DATA.cropCountry[c]);
+  if (charts.cropCountry) charts.cropCountry.setOption({ yAxis:{data:cropC}, series:[{data:cropCV, itemStyle:{color:p=>cropCV[p.dataIndex]<50?C.high:cropCV[p.dataIndex]<100?C.accent:C.cyan}}] });
+
+  // --- VULN CHART + TABLE ---
+  const { risk, minScore } = FILTER;
+  let vulnF = DATA.vuln.filter(d => (risk==='all'||d.risk===risk) && d.index>=minScore);
+  if (country !== 'all') vulnF = vulnF.filter(d => d.country === country || country === 'all');
+  const vulnSorted = [...vulnF].sort((a,b)=>a.index-b.index);
+  if (charts.vuln) charts.vuln.setOption({ yAxis:{data:vulnSorted.map(d=>d.country)}, series:[{data:vulnSorted.map(d=>d.index), itemStyle:{color:p=>{const i=vulnSorted[p.dataIndex].index;return i>=70?C.high:i>=40?C.mid:C.low;}}}] });
+
+  // --- UPDATE KPI CARDS ---
+  updateKPIs(country, yearFrom, yearTo);
+
+  // --- UPDATE TABLE ---
+  buildVulnTableFiltered(vulnF);
+}
+
+// ── UPDATE KPI VALUES ──
+function updateKPIs(country, yearFrom, yearTo) {
+  // GHG KPI
+  let ghgVals = Object.entries(DATA.ghgLatest);
+  if (country !== 'all') ghgVals = ghgVals.filter(([c]) => c === country);
+  const ghgAvg = ghgVals.length ? (ghgVals.reduce((s,[,v])=>s+v,0)/ghgVals.length).toFixed(2) : '—';
+  setKPI('kpiGHG', ghgAvg + ' t');
+
+  // Temp KPI
+  const tempFiltered = Object.entries(DATA.temp).filter(([y])=>+y>=yearFrom&&+y<=yearTo).map(([,v])=>v);
+  const tempAvg = tempFiltered.length ? (tempFiltered.reduce((s,v)=>s+v,0)/tempFiltered.length).toFixed(2) : '—';
+  setKPI('kpiTemp', tempAvg + '°C');
+
+  // Sea level KPI
+  const seaFiltered = Object.entries(DATA.sea).filter(([y])=>+y>=Math.max(1993,yearFrom)&&+y<=Math.min(2023,yearTo)).map(([,v])=>v);
+  const seaAvg = seaFiltered.length ? (seaFiltered.reduce((s,v)=>s+v,0)/seaFiltered.length).toFixed(3) : '—';
+  setKPI('kpiSea', seaAvg + ' m');
+
+  // Disaster loss KPI
+  let disVals = Object.entries(DATA.disasterCountry);
+  if (country !== 'all') disVals = disVals.filter(([c]) => c === country);
+  const disTotal = disVals.reduce((s,[,v])=>s+v,0);
+  setKPI('kpiDisaster', (disTotal/1000000).toFixed(0) + 'M');
+
+  // Persons KPI
+  const persFiltered = Object.entries(DATA.personsYear).filter(([y])=>+y>=Math.max(2005,yearFrom)&&+y<=Math.min(2023,yearTo)).map(([,v])=>v);
+  const persTotal = persFiltered.reduce((s,v)=>s+v,0);
+  setKPI('kpiPersons', persTotal > 1000000 ? (persTotal/1000000).toFixed(2)+'M' : (persTotal/1000).toFixed(0)+'K');
+
+  // Loss per person
+  if (disTotal > 0 && persTotal > 0) setKPI('kpiLossPerPerson', (disTotal/persTotal).toFixed(2));
+
+  // Crop KPI
+  const cropFiltered = Object.entries(DATA.cropTrend).filter(([y])=>+y>=Math.max(1990,yearFrom)&&+y<=Math.min(2024,yearTo)).map(([,v])=>v);
+  const cropAvg = cropFiltered.length ? (cropFiltered.reduce((s,v)=>s+v,0)/cropFiltered.length).toFixed(2) : '—';
+  setKPI('kpiCrop', cropAvg);
+
+  // Rainfall KPI
+  const rainFiltered = Object.entries(DATA.rainTrend).filter(([y])=>+y>=Math.max(1990,yearFrom)&&+y<=Math.min(2025,yearTo)).map(([,v])=>v);
+  const rainAvg = rainFiltered.length ? (rainFiltered.reduce((s,v)=>s+v,0)/rainFiltered.length).toFixed(2) : '—';
+  setKPI('kpiRain', rainAvg + ' mm');
+}
+
+function setKPI(id, val) {
+  const el = document.getElementById(id);
+  if (el) el.textContent = val;
+}
+
+function buildVulnTableFiltered(filtered) {
+  const table = document.getElementById('vulnTable');
+  if (!table) return;
+  const headers = ['Country','GHG Score','Disaster Score','Persons Score','Crop Score','Vulnerability Index','Risk'];
+  table.innerHTML = '<thead><tr>'+headers.map(h=>'<th>'+h+'</th>').join('')+'</tr></thead>';
+  const tbody = document.createElement('tbody');
+  filtered.forEach(d => {
+    const rc = d.risk==='High Risk'?'risk-high':d.risk==='Medium Risk'?'risk-mid':'risk-low';
+    const bc = d.risk==='High Risk'?C.high:d.risk==='Medium Risk'?C.mid:C.low;
+    tbody.innerHTML += '<tr><td style="font-weight:500">'+d.country+'</td><td>'+d.ghg.toFixed(2)+'</td><td>'+d.disaster.toFixed(2)+'</td><td>'+d.persons.toFixed(2)+'</td><td>'+d.crop.toFixed(2)+'</td><td><div class="score-bar-wrap"><span style="min-width:36px;color:'+bc+';font-weight:600">'+d.index.toFixed(1)+'</span><div class="score-bar-bg"><div class="score-bar-fill" style="width:'+d.index+'%;background:'+bc+'"></div></div></div></td><td><span class="risk-badge '+rc+'">'+d.risk+'</span></td></tr>';
+  });
+  table.appendChild(tbody);
+}
+
+// ── SLICER EVENT HANDLERS (all update global state then refresh everything) ──
+function applyClimateFilter() {
+  FILTER.country = document.getElementById('climateCountry').value;
+  FILTER.yearFrom = +document.getElementById('climateYearFrom').value;
+  FILTER.yearTo = +document.getElementById('climateYearTo').value;
+  syncSlicers();
+  updateAllCharts();
+}
+
+function resetClimateFilter() {
+  FILTER.country='all'; FILTER.yearFrom=1990; FILTER.yearTo=2025;
+  syncSlicers(); updateAllCharts();
+}
+
+function applyEconomicFilter() {
+  FILTER.country = document.getElementById('economicCountry').value;
+  FILTER.yearFrom = +document.getElementById('economicYearFrom').value;
+  FILTER.yearTo = +document.getElementById('economicYearTo').value;
+  syncSlicers();
+  updateAllCharts();
+}
+
+function resetEconomicFilter() {
+  FILTER.country='all'; FILTER.yearFrom=1990; FILTER.yearTo=2025;
+  syncSlicers(); updateAllCharts();
+}
+
+function applyLivelihoodsFilter() {
+  FILTER.country = document.getElementById('livelihoodsCountry').value;
+  FILTER.yearFrom = +document.getElementById('livelihoodsYearFrom').value;
+  FILTER.yearTo = +document.getElementById('livelihoodsYearTo').value;
+  syncSlicers();
+  updateAllCharts();
+}
+
+function resetLivelihoodsFilter() {
+  FILTER.country='all'; FILTER.yearFrom=1990; FILTER.yearTo=2025;
+  syncSlicers(); updateAllCharts();
+}
+
+function applyVulnFilter() {
+  FILTER.risk = document.getElementById('vulnRisk').value;
+  FILTER.minScore = +document.getElementById('vulnMinScore').value;
+  updateAllCharts();
+}
+
+function resetVulnFilter() {
+  FILTER.risk='all'; FILTER.minScore=0;
+  document.getElementById('vulnRisk').value='all';
+  document.getElementById('vulnMinScore').value=0;
+  document.getElementById('vulnMinScoreVal').textContent='0';
+  updateAllCharts();
+}
+
+window.addEventListener('load', () => {
+  setupReveal();
+  setupCounters();
+  buildTempChart();
+  buildSeaChart();
+  buildGHGChart();
+  buildDisasterCountryChart();
+  buildPersonsChart();
+  buildScatterChart();
+  buildCropChart();
+  buildRainChart();
+  buildCropCountryChart();
+  buildVulnChart();
+  buildDonutChart();
+  buildVulnTable();
+});
+</script>
+</body>
+</html>
